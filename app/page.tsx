@@ -11,24 +11,25 @@ import {
   FieldTitle,
 } from "@/components/ui/field"
 import { Label } from "@/components/ui/label"
-import { Problem, getProblems } from "@/app/actions";
+import { Input } from "@/components/ui/input";
+import { Problem, Submission, fetchProblems, fetchData } from "@/app/actions";
 import { useState, useEffect } from "react";
+import { useFormState } from "react-dom";
 
 export default function Home() {
-  const [problems, setProblems] = useState([] as Problem[]);
+  const [userName, setUserName] = useState<string>("tourist");
+  const [problems, setProblems] = useState<Problem[]>([] as Problem[]);
+  const [submissions, setSubmissions] = useState<Submission[]>([] as Submission[]);
 
-  // useEffect(() => {
-  //   const runFetch = async () => {
-  //     const result = await getProblems();
-  //     setProblems(result);
-  //   };
+  const getData = async () => {
+    const _problems = await fetchProblems();
+    setProblems(_problems);
 
-  //   runFetch();
-  // }, []);
+    const _submissions = await fetchData(userName);
+    setSubmissions(_submissions);
 
-  const runFetch = async () => {
-    const result = await getProblems();
-    setProblems(result);
+    console.log(_problems);
+    console.log(_submissions);
   };
 
   // if user provides tags, we will fetch problems of only that tag
@@ -39,52 +40,28 @@ export default function Home() {
 
   return (
     <div>
-      {/* <FieldGroup className="max-w-sm">
-        <Field orientation="horizontal">
-          <Checkbox id="terms-checkbox" name="terms-checkbox" />
-          <Label htmlFor="terms-checkbox">Accept terms and conditions</Label>
-        </Field>
-        <Field orientation="horizontal">
-          <Checkbox
-            id="terms-checkbox-2"
-            name="terms-checkbox-2"
-            defaultChecked
-          />
-          <FieldContent>
-            <FieldLabel htmlFor="terms-checkbox-2">
-              Accept terms and conditions
-            </FieldLabel>
-            <FieldDescription>
-              By clicking this checkbox, you agree to the terms.
-            </FieldDescription>
-          </FieldContent>
-        </Field>
-        <Field orientation="horizontal" data-disabled>
-          <Checkbox id="toggle-checkbox" name="toggle-checkbox" disabled />
-          <FieldLabel htmlFor="toggle-checkbox">Enable notifications</FieldLabel>
-        </Field>
-        <FieldLabel>
-          <Field orientation="horizontal">
-            <Checkbox id="toggle-checkbox-2" name="toggle-checkbox-2" />
-            <FieldContent>
-              <FieldTitle>Enable notifications</FieldTitle>
-              <FieldDescription>
-                You can enable or disable notifications at any time.
-              </FieldDescription>
-            </FieldContent>
-          </Field>
-        </FieldLabel>
-      </FieldGroup> */}
+      <Input
+        placeholder="Username"
+        required
+        value={userName}
+        onChange={(e) => setUserName(e.target.value)}
+      />
 
-      <Button onClick={runFetch}>
+      <Button onClick={getData}>
         Boop
       </Button>
 
-      <p>
-        {problems.map((problem) => (
-          <p>{problem.contestId}</p>
+      <div>
+        <p>Username: {userName}</p>
+
+        {submissions.map((submission) => (
+          <p>{submission.problem.name}</p>
         ))}
-      </p>
+
+        {problems.map((problem) => (
+          <p>{problem.name}</p>
+        ))}
+      </div>
     </div>
   );
 }
