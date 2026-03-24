@@ -104,7 +104,7 @@ export async function fetchProblems(): Promise<Problem[]> {
   return problems;
 }
 
-export async function fetchData(userName: string): Promise<Submission[]> {
+export async function fetchSubmissions(userName: string): Promise<Submission[]> {
   const METHOD = `user.status?handle=${userName}`;
   const DESTINATION = CODEFORCES_API + METHOD;
 
@@ -112,4 +112,35 @@ export async function fetchData(userName: string): Promise<Submission[]> {
   const result = response["result"];
 
   return result;
+}
+
+export async function generateTraining(userName: string): Promise<Problem[]> {
+  const problems = await fetchProblems();
+  const submissions = await fetchSubmissions(userName);
+
+  const submissionsSet = new Set(
+    submissions.map(
+      (submission) => `${submission.problem.contestId}::${submission.problem.index}`
+    )
+  );
+
+  // future: apply other filters here like tags, rating, date, div, etc
+  let filteredProblems = problems.filter(
+    (problem) =>
+      !submissionsSet.has(`${problem.contestId}::${problem.index}`)
+  );
+
+  const indexedProblems: [number, Problem][] = filteredProblems.map(
+    (problem) => [Math.random(), problem]
+  );
+
+  const shuffledProblems = indexedProblems.sort(
+    (a, b) => a[0] - b[0]
+  );
+
+  const normalizedProblems = shuffledProblems.map(
+    (element) => element[1]
+  );
+
+  return normalizedProblems.slice(0, 4);
 }

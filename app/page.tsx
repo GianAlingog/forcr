@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/field"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input";
-import { Problem, Submission, fetchProblems, fetchData } from "@/app/actions";
+import { Problem, Submission, fetchProblems, fetchSubmissions, generateTraining } from "@/app/actions";
 import { useState, useEffect } from "react";
 import { useFormState } from "react-dom";
 
@@ -22,21 +22,15 @@ export default function Home() {
   const [submissions, setSubmissions] = useState<Submission[]>([] as Submission[]);
 
   const getData = async () => {
-    const _problems = await fetchProblems();
+    const _problems = await generateTraining(userName);
     setProblems(_problems);
-
-    const _submissions = await fetchData(userName);
-    setSubmissions(_submissions);
-
-    console.log(_problems);
-    console.log(_submissions);
   };
 
   // if user provides tags, we will fetch problems of only that tag
   // ^^^ filter by tags
   // eventually, filter by rating
 
-  // far future: only return problems the user hasn't solved (some login / saving user)
+  // accept saving the userdata
 
   return (
     <div>
@@ -54,13 +48,13 @@ export default function Home() {
       <div>
         <p>Username: {userName}</p>
 
-        {submissions.map((submission) => (
+        {/* {submissions ? submissions.map((submission) => (
           <p>{submission.problem.name}</p>
-        ))}
+        )) : <div></div>} */}
 
-        {problems.map((problem) => (
+        {problems ? problems.map((problem) => (
           <p>{problem.name}</p>
-        ))}
+        )) : <div></div>}
       </div>
     </div>
   );
