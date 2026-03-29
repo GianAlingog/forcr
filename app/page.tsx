@@ -23,7 +23,7 @@ export default function Home() {
 
   const getData = async () => {
     const _problems = await generateTraining(userName);
-    setProblems(_problems);
+    setProblems(_problems.problems);
   };
 
   // if user provides tags, we will fetch problems of only that tag
