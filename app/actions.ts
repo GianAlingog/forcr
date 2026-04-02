@@ -122,6 +122,7 @@ export async function fetchProblems(): Promise<Problem[]> {
   return problems;
 }
 
+// modify this to take some limit amount and date
 export async function fetchSubmissions(userName: string): Promise<Submission[]> {
   const METHOD = `user.status?handle=${userName}`;
   const DESTINATION = CODEFORCES_API + METHOD;
@@ -197,4 +198,23 @@ export async function fetchTrainingStatus(training: Training): Promise<Training>
   }
 
   return training;
+}
+
+export async function checkCompilationError(userName: string, problem: Problem): Promise<boolean> {
+
+  const submissions = await fetchSubmissions(userName);
+
+  const submissionsMap = new Map<string, Array<Submission>>();
+  
+  for (const submission of submissions) {
+    if (submission.verdict !== SubmissionStatus.COMPILATION_ERROR) {
+      continue;
+    }
+    
+    // ensure the behavior is that it will create a new one
+    submissionsMap.get(stringify(submission.problem))
+      ?.push(submission);
+  }
+
+  return submissionsMap.has(stringify(problem));
 }
