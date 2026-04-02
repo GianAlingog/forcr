@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Forcr",
   description: "The Codeforces forcer",
+  icons: {
+    icon: [
+      { url: "/forcr-bg.png", type: "image/png" },
+    ],
+  },
 };
 
 export default function RootLayout({
