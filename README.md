@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# forcr
+<div align="center">
+  <a href="https://github.com/GianAlingog/forcr">
+    <img src="/public/forcr-bg.png" alt="Logo" width="250" height="250">
+  </a>
 
-## Getting Started
+<h3 align="center">forcr</h3>
 
-First, run the development server:
+  <p align="center">
+    The Codeforces forcer.
+    <br />
+    <a href="https://github.com/GianAlingog/forcr"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://google.com/">View Demo</a>
+    ·
+    <a href="https://github.com/GianAlingog/forcr/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    ·
+    <a href="https://github.com/GianAlingog/forcr/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+  </p>
+</div>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**forcr** is a self-training tool for competitive programmers that generates mock contests using real Codeforces problems. It helps you practice problem-solving under realistic contest conditions, with customizable constraints for tags and difficulty, and instant re-rolls for variety.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Mock Contest Generator:** Instantly generate a set of 4 Codeforces problems for a self-contained practice round.
+- **Tag Filtering:** Select from popular Codeforces tags (e.g., `dp`, `math`, `greedy`, etc.) to focus your training on specific topics.
+- **Difficulty Selection:** Choose the rating for each problem (from 800 to 3500, in 100-point increments) or leave it random.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Planned Features
+- **Profile Analysis:** View key statistics about your training habits and progress.
+- **Rating Graph Comparison:** Find users who have a similar trend or progression to yours and analyze how their training can shape yours.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Why Use forcr?
 
-## Deploy on Vercel
+- **Focused Practice:** Target your weaknesses by filtering for specific tags and ratings.
+- **Contest Simulation:** Mimic real contest conditions by generating a set of problems at your chosen difficulty.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Supported Tags
+
+- greedy
+- math
+- implementation
+- brute force
+- constructive algorithms
+- dp
+- binary search
+- data structures
+- sortings
+- dfs and similar
+- number theory
+- graphs
+- two pointers
+- trees
+- strings
+- bitmasks
+- games
+- combinatorics
+- dsu
+- shortest paths
+- geometry
+- interactive
+- probabilities
+
+---
+
+## Contributing
+
+Pull requests and suggestions are welcome! Please open an issue to discuss your ideas or report bugs.
+
+<!-- ---
+
+## License
+
+[LICENSE](LICENSE) -->
+
+---
+
+## Resources
+
+- [Codeforces](https://codeforces.com/)
+- [React](https://react.dev/)
+
+---
+
+**forcr** — Practice smarter, compete harder!
