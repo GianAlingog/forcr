@@ -58,7 +58,62 @@ export default function Home() {
   );
 }
 
+function formatTime(timeInSeconds: number): string {
+  const seconds = timeInSeconds % 60;
+  const minutes = Math.floor((timeInSeconds % 3600) / 60);
+  const hours = Math.floor(timeInSeconds / 3600);
+
+  const pad = (value: number) => value.toString().padStart(2, "0");
+
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+}
+
 function TrainingPage({ training }: { training: Training }) {
+  const [isTraining, setIsTraining] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [endTimeSeconds, setEndTimeSeconds] = useState<number | null>(null);
+
+  const startTraining = () => {
+    const duration = 2 * 60 * 60; // in seconds
+    const currentTime = Math.floor(Date.now() / 1000);
+    const endTime = currentTime + duration;
+
+    setEndTimeSeconds(endTime);
+    setTimeRemaining(duration);
+    setIsTraining(true);
+
+    training.startTimeSeconds = currentTime;
+  };
+
+  const endTraining = () => {
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    setEndTimeSeconds(null);
+    setTimeRemaining(0);
+    setIsTraining(false);
+
+    training.endTimeSeconds = currentTime;
+  };
+
+  useEffect(() => {
+    if (!isTraining || endTimeSeconds === null) {
+      return;
+    }
+
+    const id = setInterval(() => {
+      const currentTime = Math.floor(Date.now() / 1000);
+      const remaining = Math.max(0, endTimeSeconds - currentTime);
+      setTimeRemaining(remaining);
+
+      if (remaining === 0) {
+        clearInterval(id);
+        endTraining();
+      }
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, [isTraining, endTimeSeconds]);
+
   return (
     <div className="space-y-2">
       {training.problems.map((problem) => (
@@ -73,6 +128,20 @@ function TrainingPage({ training }: { training: Training }) {
           </Link>
         </p>
       ))}
+
+      {isTraining ? (
+        <>
+          <div>{formatTime(timeRemaining)}</div>
+
+          <Button onClick={endTraining}>
+            End
+          </Button>
+        </>
+      ) : (
+        <Button onClick={startTraining}>
+          Start
+        </Button>
+      )}
     </div>
   );
 }
