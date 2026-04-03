@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/field"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input";
-import { fetchProblems, fetchSubmissions, generateTraining, stringify } from "@/app/actions";
-import { Problem, Submission, Training } from "@/lib/types"
+import { fetchProblems, fetchSubmissions, fetchTrainingStatus, generateTraining, stringify } from "@/app/actions";
+import { Problem, Submission, SubmissionStatus, Training } from "@/lib/types"
 import { useState, useEffect } from "react";
 import Link from "next/link"
 
@@ -69,6 +69,7 @@ function formatTime(timeInSeconds: number): string {
 }
 
 function TrainingPage({ training }: { training: Training }) {
+  // TODO: lift state up to parent for the dynamic layout loading
   const [isTraining, setIsTraining] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [endTimeSeconds, setEndTimeSeconds] = useState<number | null>(null);
@@ -114,6 +115,19 @@ function TrainingPage({ training }: { training: Training }) {
     return () => clearInterval(id);
   }, [isTraining, endTimeSeconds]);
 
+  const getStatus = async () => {
+    // double check that this is safe behavior
+    training = await fetchTrainingStatus(training);
+
+    // now go through all and update the screen if solved
+    // stub: just console log
+    for (const result of training.results) {
+      if (result.submission !== null && result.submission.verdict === SubmissionStatus.OK) {
+        console.log(`User ${training.userName} has AC on: ${stringify(result.submission.problem)}`);
+      }
+    }
+  };
+
   return (
     <div className="space-y-2">
       {training.problems.map((problem) => (
@@ -133,8 +147,13 @@ function TrainingPage({ training }: { training: Training }) {
         <>
           <div>{formatTime(timeRemaining)}</div>
 
+          {/* TODO: ask confirmation from the user to end the training */}
           <Button onClick={endTraining}>
             End
+          </Button>
+
+          <Button onClick={getStatus}>
+            Refresh
           </Button>
         </>
       ) : (

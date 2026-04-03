@@ -75,7 +75,7 @@ export async function generateTraining(userName: string): Promise<Training> {
     preTrainingRating: 1500,
     postTrainingRating: 1500,
     problems: normalizedProblems.slice(0, 4),
-    results: [] as Result[],
+    results: Array.from({ length: 4 }, () => ({ submission: null })),
     creationTimeSeconds: timify(),
     startTimeSeconds: 0,
     endTimeSeconds: 0,
@@ -95,9 +95,12 @@ export async function fetchTrainingStatus(training: Training): Promise<Training>
       continue;
     }
     
-    // ensure the behavior is that it will create a new one
-    submissionsMap.get(stringify(submission.problem))
-      ?.push(submission);
+    const key = stringify(submission.problem);
+    if (!submissionsMap.has(key)) {
+      submissionsMap.set(key, []);
+    }
+
+    submissionsMap.get(key)!.push(submission);
   }
   
   for (let i = 0; i < training.problems.length; i++) {
@@ -123,9 +126,12 @@ export async function checkCompilationError(userName: string, problem: Problem):
       continue;
     }
     
-    // ensure the behavior is that it will create a new one
-    submissionsMap.get(stringify(submission.problem))
-      ?.push(submission);
+    const key = stringify(submission.problem);
+    if (!submissionsMap.has(key)) {
+      submissionsMap.set(key, []);
+    }
+
+    submissionsMap.get(key)!.push(submission);
   }
 
   return submissionsMap.has(stringify(problem));

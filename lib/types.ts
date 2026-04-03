@@ -91,8 +91,6 @@ export type Submission = {
 };
 
 export type Result = {
-  contestId: number,
-  index: string,
   submission: Submission | null,
 };
 
