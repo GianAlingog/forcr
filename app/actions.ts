@@ -2,7 +2,6 @@ import { Problem, Submission, Training, Result, SubmissionStatus } from "@/lib/t
 
 const CODEFORCES_API = "https://codeforces.com/api/";
 
-// TODO: move these types somewhere else
 export function timify(): number {
   return 0;
 }
@@ -11,6 +10,9 @@ export function stringify(problem: Problem): string {
   return `${problem.contestId}::${problem.index}`;
 }
 
+// TODO: design some sort of cache?
+// this is weird because we're planning to allow local running
+// check the file size and maybe save it somewhere
 export async function fetchProblems(): Promise<Problem[]> {
   const METHOD = `problemset.problems`;
   const DESTINATION = CODEFORCES_API + METHOD;
@@ -26,9 +28,9 @@ export async function fetchProblems(): Promise<Problem[]> {
   }
 }
 
-// modify this to take some limit amount and date
-export async function fetchSubmissions(userName: string): Promise<Submission[]> {
-  const METHOD = `user.status?handle=${userName}`;
+// future: also filter by date range
+export async function fetchSubmissions(userName: string, limit: number = 100): Promise<Submission[]> {
+  const METHOD = `user.status?handle=${userName}&from=1&count=${limit}`;
   const DESTINATION = CODEFORCES_API + METHOD;
 
   try {
