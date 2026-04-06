@@ -45,6 +45,24 @@ export async function fetchSubmissions(userName: string, limit: number = -1): Pr
   }
 }
 
+export async function generateIdentifyProblem(): Promise<Problem> {
+  const problems = await fetchProblems();
+
+  const indexedProblems: [number, Problem][] = problems.map(
+    (problem) => [Math.random(), problem]
+  );
+
+  const shuffledProblems = indexedProblems.sort(
+    (a, b) => a[0] - b[0]
+  );
+
+  const normalizedProblems = shuffledProblems.map(
+    (element) => element[1]
+  );
+
+  return normalizedProblems[0];
+};
+
 export async function generateTraining(userName: string): Promise<Training> {
   const problems = await fetchProblems();
   const submissions = await fetchSubmissions(userName);
@@ -119,8 +137,7 @@ export async function fetchTrainingStatus(training: Training): Promise<Training>
 }
 
 export async function checkCompilationError(userName: string, problem: Problem): Promise<boolean> {
-
-  const submissions = await fetchSubmissions(userName);
+  const submissions = await fetchSubmissions(userName, 100);
 
   const submissionsMap = new Map<string, Array<Submission>>();
   

@@ -12,49 +12,122 @@ import {
 } from "@/components/ui/field"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input";
-import { fetchProblems, fetchSubmissions, fetchTrainingStatus, generateTraining, stringify } from "@/app/actions";
+import { checkCompilationError, fetchProblems, fetchSubmissions, fetchTrainingStatus, generateIdentifyProblem, generateTraining, stringify } from "@/app/actions";
+import { fetchUserName, storeUserName } from "@/app/utils";
 import { Problem, Submission, SubmissionStatus, Training } from "@/lib/types"
-import { useState, useEffect } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import Link from "next/link"
 
 export default function Home() {
-  const [userName, setUserName] = useState<string>("tourist");
-  // const [problems, setProblems] = useState<Problem[]>([] as Problem[]);
+  const [userName, setUserName] = useState<string | null>(fetchUserName());
   const [training, setTraining] = useState<Training | null>(null);
-  const [submissions, setSubmissions] = useState<Submission[]>([] as Submission[]);
 
-  const getTraining = async () => {
-    const _training = await generateTraining(userName);
-    setTraining(_training);
+  const getUserName = () => {
+    setUserName(fetchUserName());
   };
-
   // if user provides tags, we will fetch problems of only that tag
   // ^^^ filter by tags
   // eventually, filter by rating
 
   // accept saving the userdata
 
+  return userName === null
+    ? <IdentifyPage getUserName={getUserName} />
+    : <TrainingPage userName={userName} training={training} setTraining={setTraining} />;
+}
+
+type IdentifyPageProps = {
+  getUserName: () => void;
+};
+
+function IdentifyPage({ getUserName }: IdentifyPageProps) {
+  const [userName, setUserName] = useState<string>("");
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [identifyProblem, setIdentifyProblem] = useState<Problem | null>(null);
+  const [isIdentifying, setIsIdentifying] = useState(false);
+  const [isFailed, setIsFailed] = useState(false);
+
+  const getIdentifyProblem = async () => {
+    const _identifyProblem = await generateIdentifyProblem();
+    setIdentifyProblem(_identifyProblem);
+    setIsIdentifying(true);
+    setTimeRemaining(60);
+  };
+
+  const checkIdentifyProblem = async () => {
+    const _success = await checkCompilationError(userName, identifyProblem!);
+    if (_success) {
+      storeUserName(userName);
+      getUserName();
+    } else {
+      setIsFailed(true);
+    }
+  };
+
+  useEffect(() => {
+    if (!isIdentifying) {
+      return;
+    }
+
+    if (timeRemaining <= 0) {
+      checkIdentifyProblem();
+      return;
+    }
+
+    const id = setInterval(() => {
+      setTimeRemaining((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, [isIdentifying, timeRemaining, checkIdentifyProblem]);
+
+  const resetIdentify = () => {
+    setIdentifyProblem(null);
+    setIsFailed(false);
+    setIsIdentifying(false);
+  };
+
   return (
-    <main className="min-h-svh flex items-center justify-center p-6">
+    <div className="min-h-svh flex items-center justify-center p-6">
       <div className="w-full max-w-md space-y-4">
         <Input
           placeholder="Username"
           required
-          value={userName}
+          value={userName ?? ""}
           onChange={(e) => setUserName(e.target.value)}
+          disabled={isIdentifying}
         />
 
-        <Button onClick={getTraining}>
-          Boop
-        </Button>
+        { isIdentifying
+          ? isFailed
+            ? <Button onClick={resetIdentify}>Retry</Button>
+            : null
+          : <Button onClick={getIdentifyProblem}>Verify</Button>
+        }
 
-        <p>Username: {userName}</p>
+        { isIdentifying
+          ? isFailed
+            ? <p>You failed to submit a compilation error within the alloted time.</p>
+            : (
+              <>
+                <p>Submit a compilation error to the following problem:</p>
 
-        {training ? (
-          <TrainingPage training={training} />
-        ) : null}
+                <Link
+                  href={`https://codeforces.com/problemset/problem/${identifyProblem!.contestId}/${identifyProblem!.index}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline-offset-4 hover:underline"
+                >
+                  {identifyProblem!.name} - {identifyProblem!.rating}
+                </Link>
+
+                <p>Your submission will be checked in {timeRemaining} seconds.</p>
+              </>
+            )
+          : null
+        }
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -68,7 +141,42 @@ function formatTime(timeInSeconds: number): string {
   return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 }
 
-function TrainingPage({ training }: { training: Training }) {
+type TrainingPageProps = {
+  userName: string;
+  training: Training | null;
+  setTraining: Dispatch<SetStateAction<Training | null>>;
+};
+
+function TrainingPage({ userName, training, setTraining }: TrainingPageProps) {
+  const getTraining = async () => {
+    const _training = await generateTraining(userName);
+    setTraining(_training);
+  };
+
+  return (
+    <div className="min-h-svh flex items-center justify-center p-6">
+      <div className="w-full max-w-md space-y-4">
+        <Button onClick={getTraining}>
+          Fetch
+        </Button>
+
+        <p>Username: {userName}</p>
+
+        { training
+          ? <TrainingDojo training={training} setTraining={setTraining} />
+          : null
+        }
+      </div>
+    </div>
+  );
+}
+
+type TrainingDojoProps = {
+  training: Training;
+  setTraining: Dispatch<SetStateAction<Training | null>>;
+};
+
+function TrainingDojo({ training, setTraining }: TrainingDojoProps) {
   // TODO: lift state up to parent for the dynamic layout loading
   const [isTraining, setIsTraining] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -83,7 +191,7 @@ function TrainingPage({ training }: { training: Training }) {
     setTimeRemaining(duration);
     setIsTraining(true);
 
-    training.startTimeSeconds = currentTime;
+    setTraining((prev) => prev ? { ...prev, startTimeSeconds: currentTime} : prev);
   };
 
   const endTraining = () => {
@@ -95,7 +203,7 @@ function TrainingPage({ training }: { training: Training }) {
 
     // TODO: calculate user rating change
 
-    training.endTimeSeconds = currentTime;
+    setTraining((prev) => prev ? { ...prev, endTimeSeconds: currentTime} : prev);
   };
 
   useEffect(() => {
@@ -119,15 +227,17 @@ function TrainingPage({ training }: { training: Training }) {
 
   const getStatus = async () => {
     // double check that this is safe behavior
-    training = await fetchTrainingStatus(training);
+    const updatedTraining = await fetchTrainingStatus(training);
 
     // now go through all and update the screen if solved
     // stub: just console log
-    for (const result of training.results) {
+    for (const result of updatedTraining.results) {
       if (result.submission !== null && result.submission.verdict === SubmissionStatus.OK) {
-        console.log(`User ${training.userName} has AC on: ${stringify(result.submission.problem)}`);
+        console.log(`User ${updatedTraining.userName} has AC on: ${stringify(result.submission.problem)}`);
       }
     }
+
+    setTraining(updatedTraining);
   };
 
   return (
@@ -140,7 +250,7 @@ function TrainingPage({ training }: { training: Training }) {
             rel="noopener noreferrer"
             className="underline-offset-4 hover:underline"
           >
-          {problem.name} - {problem.rating}
+            {problem.name} - {problem.rating}
           </Link>
         </p>
       ))}
