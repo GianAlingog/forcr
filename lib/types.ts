@@ -1,3 +1,25 @@
+export type User = {
+  handle: string,
+  email: string,
+  vkId: string,
+  openId: string,
+  firstName: string,
+  lastName: string,
+  country: string,
+  city: string,
+  organization: string,
+  contribution: number,
+  rank: string,
+  rating: number,
+  maxRank: string,
+  maxRating: number,
+  lastOnlineTimeSeconds: number,
+  registrationTimeSeconds: number,
+  friendOfCount: number,
+  avatar: string,
+  titlePhoto: string,
+};
+
 export enum ProblemType {
   PROGRAMMING = "PROGRAMMING",
   QUESTION = "QUESTION",
@@ -96,8 +118,8 @@ export type Result = {
 
 export type Training = {
   userName: string,
-  preTrainingRating: number,
-  postTrainingRating: number,
+  preTrainingRating: number | null,
+  postTrainingRating: number | null,
   problems: Problem[],
   results: Result[],
   creationTimeSeconds: number,

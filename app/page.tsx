@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/field"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input";
-import { checkCompilationError, fetchProblems, fetchSubmissions, fetchTrainingStatus, generateIdentifyProblem, generateTraining, stringify } from "@/app/actions";
-import { fetchUserName, storeUserName } from "@/app/utils";
+import { checkCompilationError, fetchProblems, fetchUserInfo, fetchTrainingStatus, generateIdentifyProblem, generateTraining, stringify } from "@/app/actions";
+import { fetchUserName, storeUserName, fetchUserRating, storeUserRating } from "@/app/utils";
 import { Problem, Submission, SubmissionStatus, Training } from "@/lib/types"
 import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import Link from "next/link"
@@ -148,8 +148,37 @@ type TrainingPageProps = {
 };
 
 function TrainingPage({ userName, training, setTraining }: TrainingPageProps) {
+  const [userRating, setUserRating] = useState<number | null>(fetchUserRating());
+
+  const getRating = async () => {
+    let _userRating = fetchUserRating();
+
+    if (_userRating === null) {
+      const _userInfo = await fetchUserInfo(userName);
+      if (_userInfo === null || _userInfo.rating == null) {
+        _userRating = 1500;
+      } else {
+        _userRating = _userInfo.rating;
+      }
+    }
+
+    if (_userRating == null) {
+      _userRating = 1500;
+    }
+
+    storeUserRating(_userRating);
+    setUserRating(_userRating);
+  };
+
+  if (userRating === null) {
+    getRating();
+  }
+
   const getTraining = async () => {
-    const _training = await generateTraining(userName);
+    let _training = await generateTraining(userName);
+    
+    _training.preTrainingRating = userRating;
+
     setTraining(_training);
   };
 
@@ -160,7 +189,7 @@ function TrainingPage({ userName, training, setTraining }: TrainingPageProps) {
           Fetch
         </Button>
 
-        <p>Username: {userName}</p>
+        <p>Username: {userName}, Rating: {userRating}</p>
 
         { training
           ? <TrainingDojo training={training} setTraining={setTraining} />

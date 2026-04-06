@@ -1,4 +1,5 @@
-import { Problem, Submission, Training, Result, SubmissionStatus } from "@/lib/types"
+import { Problem, Submission, Training, User, SubmissionStatus } from "@/lib/types"
+import { fetchUserRating, storeUserRating } from "./utils";
 
 const CODEFORCES_API = "https://codeforces.com/api/";
 
@@ -9,6 +10,21 @@ export function timify(): number {
 export function stringify(problem: Problem): string {
   return `${problem.contestId}::${problem.index}`;
 }
+
+export async function fetchUserInfo(userName: string): Promise<User | null> {
+  const METHOD = `user.info?handles=${userName}&checkHistoricHandles=false`;
+  const DESTINATION = CODEFORCES_API + METHOD;
+
+  try {
+    const response = await fetch(DESTINATION).then((response) => response.json());
+    if (response.status !== "OK" || !response.result) return null;
+
+    return response.result[0] as User;
+  } catch (err) {
+    console.error("Failed to fetch problems:", err);
+    return null;
+  }
+};
 
 // TODO: design some sort of cache?
 // this is weird because we're planning to allow local running
@@ -93,8 +109,8 @@ export async function generateTraining(userName: string): Promise<Training> {
 
   return {
     userName,
-    preTrainingRating: 1500,
-    postTrainingRating: 1500,
+    preTrainingRating: null,
+    postTrainingRating: null,
     problems: normalizedProblems.slice(0, 4),
     results: Array.from({ length: 4 }, () => ({ submission: null })),
     creationTimeSeconds: timify(),
