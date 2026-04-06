@@ -93,6 +93,8 @@ function TrainingPage({ training }: { training: Training }) {
     setTimeRemaining(0);
     setIsTraining(false);
 
+    // TODO: calculate user rating change
+
     training.endTimeSeconds = currentTime;
   };
 

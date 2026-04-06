@@ -29,8 +29,9 @@ export async function fetchProblems(): Promise<Problem[]> {
 }
 
 // future: also filter by date range
-export async function fetchSubmissions(userName: string, limit: number = 100): Promise<Submission[]> {
-  const METHOD = `user.status?handle=${userName}&from=1&count=${limit}`;
+export async function fetchSubmissions(userName: string, limit: number = -1): Promise<Submission[]> {
+  let METHOD = `user.status?handle=${userName}`;
+  if (limit !== -1) METHOD += `&from=1&count=${limit}`;
   const DESTINATION = CODEFORCES_API + METHOD;
 
   try {
@@ -87,7 +88,7 @@ export async function generateTraining(userName: string): Promise<Training> {
 export async function fetchTrainingStatus(training: Training): Promise<Training> {
   // iterate through the submissions
   // then check if user has made those submissions
-  const submissions = await fetchSubmissions(training.userName);
+  const submissions = await fetchSubmissions(training.userName, 100);
   
   // prune the fetch to some limit (~100 or so recent submissions)
   const submissionsMap = new Map<string, Array<Submission>>();
