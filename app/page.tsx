@@ -19,12 +19,17 @@ import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import Link from "next/link"
 
 export default function Home() {
-  const [userName, setUserName] = useState<string | null>(fetchUserName());
+  const [userName, setUserName] = useState<string | null>(null);
   const [training, setTraining] = useState<Training | null>(null);
 
   const getUserName = () => {
     setUserName(fetchUserName());
   };
+
+  useEffect(() => {
+    getUserName();
+  }, []);
+  
   // if user provides tags, we will fetch problems of only that tag
   // ^^^ filter by tags
   // eventually, filter by rating
@@ -148,7 +153,7 @@ type TrainingPageProps = {
 };
 
 function TrainingPage({ userName, training, setTraining }: TrainingPageProps) {
-  const [userRating, setUserRating] = useState<number | null>(fetchUserRating());
+  const [userRating, setUserRating] = useState<number | null>(null);
 
   const getRating = async () => {
     let _userRating = fetchUserRating();
@@ -170,9 +175,9 @@ function TrainingPage({ userName, training, setTraining }: TrainingPageProps) {
     setUserRating(_userRating);
   };
 
-  if (userRating === null) {
+  useEffect(() => {
     getRating();
-  }
+  }, []);
 
   const getTraining = async () => {
     let _training = await generateTraining(userName);
